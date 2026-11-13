@@ -1,0 +1,25 @@
+
+/answer_data/calls/
+/answer_data/incoming/
+
+# Python 虚拟环境
+/.venv/
+/venv/
+
+# 模型权重和下载缓存
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.onnx.data
+*.gguf
+pytorch_model*.bin
+/glm-4-voice-decoder/.cache/
+
+.DS_Store
+._*
+__pycache__/
+*.pyc
+
+/answer_data/web/30889a0ad4154936939bb9739954b06e/question.wav

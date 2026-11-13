@@ -1,0 +1,1739 @@
+[
+  {
+    "input_seconds": 6.325,
+    "upload_enqueue_ms": 10.363631066866219,
+    "thinking_ms": 13.278844999149442,
+    "reply_ms": 10989.093087031506,
+    "chunks": [
+      {
+        "arrival_ms": 4038.1400149781257,
+        "client_unpack_ms": 0.20655908156186342,
+        "audio_ms": 1590.5668934240362,
+        "play_at_ms": 4058.3465740596876,
+        "gap_before_ms": 0,
+        "leading_quiet_ms": 189.56916099773244,
+        "trailing_quiet_ms": 4.172335600907029
+      },
+      {
+        "arrival_ms": 7330.922299064696,
+        "client_unpack_ms": 0.2778059570118785,
+        "audio_ms": 3599.092970521542,
+        "play_at_ms": 7351.200105021708,
+        "gap_before_ms": 1702.2866375379836,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 17.233560090702948
+      },
+      {
+        "arrival_ms": 10988.141622045077,
+        "client_unpack_ms": 0.8897759253159165,
+        "audio_ms": 7128.5260770975065,
+        "play_at_ms": 11009.031397970393,
+        "gap_before_ms": 58.73832242714343,
+        "leading_quiet_ms": 9.977324263038549,
+        "trailing_quiet_ms": 533.5147392290249
+      }
+    ],
+    "server": {
+      "session": "ec3e52a43fb145abb46f5092e5ca0b18",
+      "block_sizes": [
+        25,
+        50,
+        100
+      ],
+      "events": [
+        {
+          "stage": "wav_saved",
+          "ms": 0.305
+        },
+        {
+          "stage": "inference_slot_acquired",
+          "ms": 0.338
+        },
+        {
+          "stage": "worker_started",
+          "ms": 0.538
+        },
+        {
+          "stage": "backend_lock_acquired",
+          "ms": 0.563
+        },
+        {
+          "stage": "answer_start",
+          "ms": 0.576
+        },
+        {
+          "stage": "audio_prepared",
+          "ms": 8.376
+        },
+        {
+          "stage": "models_ready",
+          "ms": 8.383
+        },
+        {
+          "stage": "input_tokenizer_start",
+          "ms": 8.417
+        },
+        {
+          "stage": "input_tokenizer_ready",
+          "ms": 242.862,
+          "tokens": 80
+        },
+        {
+          "stage": "sonar_start",
+          "ms": 242.911,
+          "enabled": false
+        },
+        {
+          "stage": "knowledge_search_skipped",
+          "ms": 242.914,
+          "enabled": false
+        },
+        {
+          "stage": "prompt_built",
+          "ms": 242.952
+        },
+        {
+          "stage": "glm_tokenizer_start",
+          "ms": 242.954
+        },
+        {
+          "stage": "glm_tokenizer_ready",
+          "ms": 244.536,
+          "tokens": 205
+        },
+        {
+          "stage": "prompt_on_device",
+          "ms": 257.053
+        },
+        {
+          "stage": "prompt_ready",
+          "ms": 257.063,
+          "tokens": 205
+        },
+        {
+          "stage": "generate_start",
+          "ms": 257.738
+        },
+        {
+          "stage": "glm_prefill_ready",
+          "ms": 705.579
+        },
+        {
+          "stage": "first_token",
+          "ms": 783.157
+        },
+        {
+          "stage": "first_audio_token",
+          "ms": 1407.692
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 2401.221,
+          "chunk": 1,
+          "tokens": 25,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 2401.301,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 4016.417,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 4017.118,
+          "chunk": 1,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 4017.274,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 4017.525,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 4024.671,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 5804.487,
+          "chunk": 2,
+          "tokens": 50,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 5804.551,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 7297.662,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 7298.349,
+          "chunk": 2,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 7298.479,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 7299.057,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 7316.631,
+          "packet": 2
+        },
+        {
+          "stage": "generate_end",
+          "ms": 10080.853
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 10080.853,
+          "chunk": 3,
+          "tokens": 89,
+          "final": true
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 10080.959,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 10932.496,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 10933.166,
+          "chunk": 3,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 10933.384,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 10934.807,
+          "packet": 3
+        },
+        {
+          "stage": "reply_tokens_decoded",
+          "ms": 10942.826,
+          "text_tokens": 33,
+          "audio_tokens": 154
+        },
+        {
+          "stage": "answer_wav_saved",
+          "ms": 10948.579
+        },
+        {
+          "stage": "answer_ready",
+          "ms": 10948.844
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 10973.216,
+          "packet": 3
+        },
+        {
+          "stage": "reply_ready",
+          "ms": 10973.38
+        }
+      ]
+    }
+  },
+  {
+    "input_seconds": 6.325,
+    "upload_enqueue_ms": 10.26338804513216,
+    "thinking_ms": 13.266861089505255,
+    "reply_ms": 11239.677120000124,
+    "chunks": [
+      {
+        "arrival_ms": 3206.300344085321,
+        "client_unpack_ms": 0.3646329278126359,
+        "audio_ms": 1590.5668934240362,
+        "play_at_ms": 3226.6649770131335,
+        "gap_before_ms": 0,
+        "leading_quiet_ms": 189.56916099773244,
+        "trailing_quiet_ms": 4.172335600907029
+      },
+      {
+        "arrival_ms": 5754.144682083279,
+        "client_unpack_ms": 0.39587391074746847,
+        "audio_ms": 2159.455782312925,
+        "play_at_ms": 5774.540555994026,
+        "gap_before_ms": 957.3086855568563,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 4.35374149659864
+      },
+      {
+        "arrival_ms": 10465.545536018908,
+        "client_unpack_ms": 1.1440670350566506,
+        "audio_ms": 7592.925170068027,
+        "play_at_ms": 10486.689603053965,
+        "gap_before_ms": 2552.693264747013,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 0.18140589569160998
+      },
+      {
+        "arrival_ms": 11239.162567071617,
+        "client_unpack_ms": 0.1840749755501747,
+        "audio_ms": 1126.1678004535147,
+        "play_at_ms": 18079.61477312199,
+        "gap_before_ms": 0.0,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 507.5736961451247
+      }
+    ],
+    "server": {
+      "session": "74715aa49138494ba504d6e563d2cd3b",
+      "block_sizes": [
+        25,
+        32,
+        100
+      ],
+      "events": [
+        {
+          "stage": "wav_saved",
+          "ms": 0.472
+        },
+        {
+          "stage": "inference_slot_acquired",
+          "ms": 0.523
+        },
+        {
+          "stage": "worker_started",
+          "ms": 0.766
+        },
+        {
+          "stage": "backend_lock_acquired",
+          "ms": 0.771
+        },
+        {
+          "stage": "answer_start",
+          "ms": 0.78
+        },
+        {
+          "stage": "audio_prepared",
+          "ms": 4.194
+        },
+        {
+          "stage": "models_ready",
+          "ms": 4.201
+        },
+        {
+          "stage": "input_tokenizer_start",
+          "ms": 4.219
+        },
+        {
+          "stage": "input_tokenizer_ready",
+          "ms": 28.197,
+          "tokens": 80
+        },
+        {
+          "stage": "sonar_start",
+          "ms": 28.232,
+          "enabled": false
+        },
+        {
+          "stage": "knowledge_search_skipped",
+          "ms": 28.233,
+          "enabled": false
+        },
+        {
+          "stage": "prompt_built",
+          "ms": 28.251
+        },
+        {
+          "stage": "glm_tokenizer_start",
+          "ms": 28.253
+        },
+        {
+          "stage": "glm_tokenizer_ready",
+          "ms": 29.649,
+          "tokens": 205
+        },
+        {
+          "stage": "prompt_on_device",
+          "ms": 29.73
+        },
+        {
+          "stage": "prompt_ready",
+          "ms": 29.738,
+          "tokens": 205
+        },
+        {
+          "stage": "generate_start",
+          "ms": 30.369
+        },
+        {
+          "stage": "glm_prefill_ready",
+          "ms": 97.656
+        },
+        {
+          "stage": "first_token",
+          "ms": 151.805
+        },
+        {
+          "stage": "first_audio_token",
+          "ms": 693.765
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 1695.031,
+          "chunk": 1,
+          "tokens": 25,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 1695.098,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 3184.644,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 3185.346,
+          "chunk": 1,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 3185.507,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 3185.755,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 3192.864,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 4137.411,
+          "chunk": 2,
+          "tokens": 32,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 4137.475,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 5728.404,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 5728.928,
+          "chunk": 2,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 5729.072,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 5729.4,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 5740.368,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 9170.251,
+          "chunk": 3,
+          "tokens": 100,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 9170.32,
+          "chunk": 3
+        },
+        {
+          "stage": "generate_end",
+          "ms": 10016.9
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 10016.9,
+          "chunk": 4,
+          "tokens": 14,
+          "final": true
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 10410.202,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 10411.031,
+          "chunk": 3,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 10411.103,
+          "chunk": 4
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 10411.182,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 10412.271,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 10449.196,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 11213.174,
+          "chunk": 4
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 11213.719,
+          "chunk": 4,
+          "packet": 4
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 11213.933,
+          "packet": 4
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 11214.111,
+          "packet": 4
+        },
+        {
+          "stage": "reply_tokens_decoded",
+          "ms": 11219.952,
+          "text_tokens": 33,
+          "audio_tokens": 156
+        },
+        {
+          "stage": "answer_wav_saved",
+          "ms": 11225.887
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 11226.026,
+          "packet": 4
+        },
+        {
+          "stage": "answer_ready",
+          "ms": 11226.254
+        },
+        {
+          "stage": "reply_ready",
+          "ms": 11226.51
+        }
+      ]
+    }
+  },
+  {
+    "input_seconds": 6.325,
+    "upload_enqueue_ms": 20.012954017147422,
+    "thinking_ms": 22.871467983350158,
+    "reply_ms": 11173.152714967728,
+    "chunks": [
+      {
+        "arrival_ms": 3240.5881989980116,
+        "client_unpack_ms": 0.37165696267038584,
+        "audio_ms": 1590.5668934240362,
+        "play_at_ms": 3260.959855960682,
+        "gap_before_ms": 0,
+        "leading_quiet_ms": 189.56916099773244,
+        "trailing_quiet_ms": 4.172335600907029
+      },
+      {
+        "arrival_ms": 5673.811816028319,
+        "client_unpack_ms": 0.3678299253806472,
+        "audio_ms": 2159.455782312925,
+        "play_at_ms": 5694.1796459537,
+        "gap_before_ms": 842.6528965689813,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 4.35374149659864
+      },
+      {
+        "arrival_ms": 10437.192015000619,
+        "client_unpack_ms": 1.8596469890326262,
+        "audio_ms": 7592.925170068027,
+        "play_at_ms": 10459.051661989652,
+        "gap_before_ms": 2605.4162337230264,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 0.18140589569160998
+      },
+      {
+        "arrival_ms": 11172.678380040452,
+        "client_unpack_ms": 0.18117891158908606,
+        "audio_ms": 1126.1678004535147,
+        "play_at_ms": 18051.976832057677,
+        "gap_before_ms": 0.0,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 507.5736961451247
+      }
+    ],
+    "server": {
+      "session": "3e165e0e7a5944d2a1d5c2cd6001bac7",
+      "block_sizes": [
+        25,
+        32,
+        100
+      ],
+      "events": [
+        {
+          "stage": "wav_saved",
+          "ms": 0.458
+        },
+        {
+          "stage": "inference_slot_acquired",
+          "ms": 0.508
+        },
+        {
+          "stage": "worker_started",
+          "ms": 0.738
+        },
+        {
+          "stage": "backend_lock_acquired",
+          "ms": 0.744
+        },
+        {
+          "stage": "answer_start",
+          "ms": 0.753
+        },
+        {
+          "stage": "audio_prepared",
+          "ms": 3.668
+        },
+        {
+          "stage": "models_ready",
+          "ms": 3.675
+        },
+        {
+          "stage": "input_tokenizer_start",
+          "ms": 3.694
+        },
+        {
+          "stage": "input_tokenizer_ready",
+          "ms": 27.801,
+          "tokens": 80
+        },
+        {
+          "stage": "sonar_start",
+          "ms": 27.834,
+          "enabled": false
+        },
+        {
+          "stage": "knowledge_search_skipped",
+          "ms": 27.835,
+          "enabled": false
+        },
+        {
+          "stage": "prompt_built",
+          "ms": 27.852
+        },
+        {
+          "stage": "glm_tokenizer_start",
+          "ms": 27.853
+        },
+        {
+          "stage": "glm_tokenizer_ready",
+          "ms": 29.242,
+          "tokens": 205
+        },
+        {
+          "stage": "prompt_on_device",
+          "ms": 29.326
+        },
+        {
+          "stage": "prompt_ready",
+          "ms": 29.333,
+          "tokens": 205
+        },
+        {
+          "stage": "generate_start",
+          "ms": 29.741
+        },
+        {
+          "stage": "glm_prefill_ready",
+          "ms": 101.079
+        },
+        {
+          "stage": "first_token",
+          "ms": 158.28
+        },
+        {
+          "stage": "first_audio_token",
+          "ms": 702.219
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 1719.68,
+          "chunk": 1,
+          "tokens": 25,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 1719.761,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 3209.613,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 3210.159,
+          "chunk": 1,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 3210.323,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 3210.569,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 3217.571,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 4162.492,
+          "chunk": 2,
+          "tokens": 32,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 4162.558,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 5638.48,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 5638.979,
+          "chunk": 2,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 5639.085,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 5639.409,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 5650.298,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 9155.944,
+          "chunk": 3,
+          "tokens": 100,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 9156.008,
+          "chunk": 3
+        },
+        {
+          "stage": "generate_end",
+          "ms": 10034.092
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 10034.092,
+          "chunk": 4,
+          "tokens": 14,
+          "final": true
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 10371.706,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 10372.417,
+          "chunk": 3,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 10372.485,
+          "chunk": 4
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 10372.549,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 10373.638,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 10410.246,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 11137.125,
+          "chunk": 4
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 11137.657,
+          "chunk": 4,
+          "packet": 4
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 11137.869,
+          "packet": 4
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 11138.046,
+          "packet": 4
+        },
+        {
+          "stage": "reply_tokens_decoded",
+          "ms": 11143.878,
+          "text_tokens": 33,
+          "audio_tokens": 156
+        },
+        {
+          "stage": "answer_wav_saved",
+          "ms": 11149.802
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 11149.964,
+          "packet": 4
+        },
+        {
+          "stage": "answer_ready",
+          "ms": 11150.185
+        },
+        {
+          "stage": "reply_ready",
+          "ms": 11150.41
+        }
+      ]
+    }
+  },
+  {
+    "input_seconds": 6.325,
+    "upload_enqueue_ms": 20.18721995409578,
+    "thinking_ms": 23.08515994809568,
+    "reply_ms": 10052.839754032902,
+    "chunks": [
+      {
+        "arrival_ms": 3247.225555940531,
+        "client_unpack_ms": 0.42501010466367006,
+        "audio_ms": 1590.5668934240362,
+        "play_at_ms": 3267.650566045195,
+        "gap_before_ms": 0,
+        "leading_quiet_ms": 189.56916099773244,
+        "trailing_quiet_ms": 4.172335600907029
+      },
+      {
+        "arrival_ms": 6695.668666972779,
+        "client_unpack_ms": 0.6682290695607662,
+        "audio_ms": 3599.092970521542,
+        "play_at_ms": 6716.3368960423395,
+        "gap_before_ms": 1858.119436573108,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 27.210884353741495
+      },
+      {
+        "arrival_ms": 10051.265296991915,
+        "client_unpack_ms": 1.4515200164169073,
+        "audio_ms": 6489.977324263038,
+        "play_at_ms": 10315.429866563882,
+        "gap_before_ms": 0.0,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 513.5600907029478
+      }
+    ],
+    "server": {
+      "session": "2331bce80f2d434bac2b97ede34c51aa",
+      "block_sizes": [
+        25,
+        50,
+        100
+      ],
+      "events": [
+        {
+          "stage": "wav_saved",
+          "ms": 0.476
+        },
+        {
+          "stage": "inference_slot_acquired",
+          "ms": 0.527
+        },
+        {
+          "stage": "worker_started",
+          "ms": 0.763
+        },
+        {
+          "stage": "backend_lock_acquired",
+          "ms": 0.768
+        },
+        {
+          "stage": "answer_start",
+          "ms": 0.777
+        },
+        {
+          "stage": "audio_prepared",
+          "ms": 8.359
+        },
+        {
+          "stage": "models_ready",
+          "ms": 8.366
+        },
+        {
+          "stage": "input_tokenizer_start",
+          "ms": 8.384
+        },
+        {
+          "stage": "input_tokenizer_ready",
+          "ms": 32.533,
+          "tokens": 80
+        },
+        {
+          "stage": "sonar_start",
+          "ms": 32.566,
+          "enabled": false
+        },
+        {
+          "stage": "knowledge_search_skipped",
+          "ms": 32.569,
+          "enabled": false
+        },
+        {
+          "stage": "prompt_built",
+          "ms": 32.585
+        },
+        {
+          "stage": "glm_tokenizer_start",
+          "ms": 32.587
+        },
+        {
+          "stage": "glm_tokenizer_ready",
+          "ms": 33.971,
+          "tokens": 205
+        },
+        {
+          "stage": "prompt_on_device",
+          "ms": 34.052
+        },
+        {
+          "stage": "prompt_ready",
+          "ms": 34.059,
+          "tokens": 205
+        },
+        {
+          "stage": "generate_start",
+          "ms": 34.848
+        },
+        {
+          "stage": "glm_prefill_ready",
+          "ms": 106.717
+        },
+        {
+          "stage": "first_token",
+          "ms": 163.92
+        },
+        {
+          "stage": "first_audio_token",
+          "ms": 712.488
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 1723.69,
+          "chunk": 1,
+          "tokens": 25,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 1723.754,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 3215.932,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 3216.608,
+          "chunk": 1,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 3216.738,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 3216.983,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 3223.996,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 5177.761,
+          "chunk": 2,
+          "tokens": 50,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 5177.845,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 6652.568,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 6653.166,
+          "chunk": 2,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 6653.303,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 6653.833,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 6670.925,
+          "packet": 2
+        },
+        {
+          "stage": "generate_end",
+          "ms": 9157.19
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 9157.19,
+          "chunk": 3,
+          "tokens": 81,
+          "final": true
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 9157.273,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 9988.501,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 9989.375,
+          "chunk": 3,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 9989.567,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 9990.523,
+          "packet": 3
+        },
+        {
+          "stage": "reply_tokens_decoded",
+          "ms": 9998.475,
+          "text_tokens": 33,
+          "audio_tokens": 146
+        },
+        {
+          "stage": "answer_wav_saved",
+          "ms": 10003.964
+        },
+        {
+          "stage": "answer_ready",
+          "ms": 10004.21
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 10025.274,
+          "packet": 3
+        },
+        {
+          "stage": "reply_ready",
+          "ms": 10025.43
+        }
+      ]
+    }
+  },
+  {
+    "input_seconds": 6.325,
+    "upload_enqueue_ms": 20.243808976374567,
+    "thinking_ms": 23.095770040526986,
+    "reply_ms": 9986.376799992286,
+    "chunks": [
+      {
+        "arrival_ms": 3217.6922949729487,
+        "client_unpack_ms": 0.4103720420971513,
+        "audio_ms": 1590.5668934240362,
+        "play_at_ms": 3238.102667015046,
+        "gap_before_ms": 0,
+        "leading_quiet_ms": 189.56916099773244,
+        "trailing_quiet_ms": 4.172335600907029
+      },
+      {
+        "arrival_ms": 6645.348243997432,
+        "client_unpack_ms": 0.7069440325722098,
+        "audio_ms": 3599.092970521542,
+        "play_at_ms": 6666.0551880300045,
+        "gap_before_ms": 1837.385627590922,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 27.210884353741495
+      },
+      {
+        "arrival_ms": 9985.184028977528,
+        "client_unpack_ms": 1.0751939844340086,
+        "audio_ms": 6489.977324263038,
+        "play_at_ms": 10265.148158551547,
+        "gap_before_ms": 0.0,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 513.5600907029478
+      }
+    ],
+    "server": {
+      "session": "c274d2cce7384928997573a17623ad0a",
+      "block_sizes": [
+        25,
+        50,
+        100
+      ],
+      "events": [
+        {
+          "stage": "wav_saved",
+          "ms": 0.443
+        },
+        {
+          "stage": "inference_slot_acquired",
+          "ms": 0.491
+        },
+        {
+          "stage": "worker_started",
+          "ms": 0.71
+        },
+        {
+          "stage": "backend_lock_acquired",
+          "ms": 0.716
+        },
+        {
+          "stage": "answer_start",
+          "ms": 0.727
+        },
+        {
+          "stage": "audio_prepared",
+          "ms": 8.557
+        },
+        {
+          "stage": "models_ready",
+          "ms": 8.566
+        },
+        {
+          "stage": "input_tokenizer_start",
+          "ms": 8.584
+        },
+        {
+          "stage": "input_tokenizer_ready",
+          "ms": 32.657,
+          "tokens": 80
+        },
+        {
+          "stage": "sonar_start",
+          "ms": 32.69,
+          "enabled": false
+        },
+        {
+          "stage": "knowledge_search_skipped",
+          "ms": 32.692,
+          "enabled": false
+        },
+        {
+          "stage": "prompt_built",
+          "ms": 32.71
+        },
+        {
+          "stage": "glm_tokenizer_start",
+          "ms": 32.711
+        },
+        {
+          "stage": "glm_tokenizer_ready",
+          "ms": 34.08,
+          "tokens": 205
+        },
+        {
+          "stage": "prompt_on_device",
+          "ms": 34.16
+        },
+        {
+          "stage": "prompt_ready",
+          "ms": 34.168,
+          "tokens": 205
+        },
+        {
+          "stage": "generate_start",
+          "ms": 35.18
+        },
+        {
+          "stage": "glm_prefill_ready",
+          "ms": 100.566
+        },
+        {
+          "stage": "first_token",
+          "ms": 154.873
+        },
+        {
+          "stage": "first_audio_token",
+          "ms": 695.01
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 1693.505,
+          "chunk": 1,
+          "tokens": 25,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 1693.584,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 3186.509,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 3187.059,
+          "chunk": 1,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 3187.19,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 3187.428,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 3194.441,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 5130.193,
+          "chunk": 2,
+          "tokens": 50,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 5130.278,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 6601.908,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 6602.539,
+          "chunk": 2,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 6602.702,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 6603.232,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 6620.595,
+          "packet": 2
+        },
+        {
+          "stage": "generate_end",
+          "ms": 9109.516
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 9109.516,
+          "chunk": 3,
+          "tokens": 81,
+          "final": true
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 9109.59,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 9921.518,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 9922.466,
+          "chunk": 3,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 9922.575,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 9923.534,
+          "packet": 3
+        },
+        {
+          "stage": "reply_tokens_decoded",
+          "ms": 9931.93,
+          "text_tokens": 33,
+          "audio_tokens": 146
+        },
+        {
+          "stage": "answer_wav_saved",
+          "ms": 9937.537
+        },
+        {
+          "stage": "answer_ready",
+          "ms": 9937.79
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 9958.948,
+          "packet": 3
+        },
+        {
+          "stage": "reply_ready",
+          "ms": 9959.1
+        }
+      ]
+    }
+  },
+  {
+    "input_seconds": 6.325,
+    "upload_enqueue_ms": 20.30444599222392,
+    "thinking_ms": 23.140546982176602,
+    "reply_ms": 11318.82345606573,
+    "chunks": [
+      {
+        "arrival_ms": 3322.953646071255,
+        "client_unpack_ms": 0.42146292980760336,
+        "audio_ms": 1590.5668934240362,
+        "play_at_ms": 3343.375109001063,
+        "gap_before_ms": 0,
+        "leading_quiet_ms": 189.56916099773244,
+        "trailing_quiet_ms": 4.172335600907029
+      },
+      {
+        "arrival_ms": 5791.185321984813,
+        "client_unpack_ms": 0.40545198135077953,
+        "audio_ms": 2159.455782312925,
+        "play_at_ms": 5811.590773966163,
+        "gap_before_ms": 877.648771541064,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 4.35374149659864
+      },
+      {
+        "arrival_ms": 10583.029146073386,
+        "client_unpack_ms": 1.35989289265126,
+        "audio_ms": 7592.925170068027,
+        "play_at_ms": 10604.389038966037,
+        "gap_before_ms": 2633.3424826869486,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 0.18140589569160998
+      },
+      {
+        "arrival_ms": 11318.348480039276,
+        "client_unpack_ms": 0.21129695232957602,
+        "audio_ms": 1126.1678004535147,
+        "play_at_ms": 18197.314209034063,
+        "gap_before_ms": 0.0,
+        "leading_quiet_ms": 0.0,
+        "trailing_quiet_ms": 507.5736961451247
+      }
+    ],
+    "server": {
+      "session": "d6605472973348819169ff95196d2f13",
+      "block_sizes": [
+        25,
+        32,
+        100
+      ],
+      "events": [
+        {
+          "stage": "wav_saved",
+          "ms": 0.443
+        },
+        {
+          "stage": "inference_slot_acquired",
+          "ms": 0.491
+        },
+        {
+          "stage": "worker_started",
+          "ms": 0.71
+        },
+        {
+          "stage": "backend_lock_acquired",
+          "ms": 0.715
+        },
+        {
+          "stage": "answer_start",
+          "ms": 0.725
+        },
+        {
+          "stage": "audio_prepared",
+          "ms": 8.176
+        },
+        {
+          "stage": "models_ready",
+          "ms": 8.183
+        },
+        {
+          "stage": "input_tokenizer_start",
+          "ms": 8.205
+        },
+        {
+          "stage": "input_tokenizer_ready",
+          "ms": 32.397,
+          "tokens": 80
+        },
+        {
+          "stage": "sonar_start",
+          "ms": 32.429,
+          "enabled": false
+        },
+        {
+          "stage": "knowledge_search_skipped",
+          "ms": 32.431,
+          "enabled": false
+        },
+        {
+          "stage": "prompt_built",
+          "ms": 32.448
+        },
+        {
+          "stage": "glm_tokenizer_start",
+          "ms": 32.45
+        },
+        {
+          "stage": "glm_tokenizer_ready",
+          "ms": 33.85,
+          "tokens": 205
+        },
+        {
+          "stage": "prompt_on_device",
+          "ms": 33.93
+        },
+        {
+          "stage": "prompt_ready",
+          "ms": 33.937,
+          "tokens": 205
+        },
+        {
+          "stage": "generate_start",
+          "ms": 34.558
+        },
+        {
+          "stage": "glm_prefill_ready",
+          "ms": 100.941
+        },
+        {
+          "stage": "first_token",
+          "ms": 155.521
+        },
+        {
+          "stage": "first_audio_token",
+          "ms": 704.83
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 1716.551,
+          "chunk": 1,
+          "tokens": 25,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 1716.62,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 3291.688,
+          "chunk": 1
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 3292.235,
+          "chunk": 1,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 3292.404,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 3292.665,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 3299.615,
+          "packet": 1
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 4191.937,
+          "chunk": 2,
+          "tokens": 32,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 4192.001,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 5755.162,
+          "chunk": 2
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 5755.755,
+          "chunk": 2,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 5755.927,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 5756.264,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 5767.374,
+          "packet": 2
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 9297.279,
+          "chunk": 3,
+          "tokens": 100,
+          "final": false
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 9297.358,
+          "chunk": 3
+        },
+        {
+          "stage": "generate_end",
+          "ms": 10182.63
+        },
+        {
+          "stage": "chunk_tokens_ready",
+          "ms": 10182.63,
+          "chunk": 4,
+          "tokens": 14,
+          "final": true
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 10516.745,
+          "chunk": 3
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 10517.737,
+          "chunk": 3,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_decode_start",
+          "ms": 10517.805,
+          "chunk": 4
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 10517.869,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 10518.96,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 10555.764,
+          "packet": 3
+        },
+        {
+          "stage": "chunk_decoded",
+          "ms": 11282.627,
+          "chunk": 4
+        },
+        {
+          "stage": "chunk_pcm_ready",
+          "ms": 11283.118,
+          "chunk": 4,
+          "packet": 4
+        },
+        {
+          "stage": "chunk_dequeued",
+          "ms": 11283.219,
+          "packet": 4
+        },
+        {
+          "stage": "chunk_send_start",
+          "ms": 11283.397,
+          "packet": 4
+        },
+        {
+          "stage": "reply_tokens_decoded",
+          "ms": 11289.273,
+          "text_tokens": 33,
+          "audio_tokens": 156
+        },
+        {
+          "stage": "answer_wav_saved",
+          "ms": 11295.124
+        },
+        {
+          "stage": "chunk_send_end",
+          "ms": 11295.33,
+          "packet": 4
+        },
+        {
+          "stage": "answer_ready",
+          "ms": 11295.555
+        },
+        {
+          "stage": "reply_ready",
+          "ms": 11295.789
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,6 @@
+torch==2.6.0+cu124
+torchaudio==2.6.0+cu124
+fairseq2==0.4.5
+fairseq2n==0.4.5+cu124
+sonar-space==0.4.0
+numpy==1.24.4

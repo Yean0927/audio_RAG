@@ -1,0 +1,182 @@
+INFO:voice-chat:Loading language model (4bit) on cuda:0
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.48s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.35s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:03<00:01,  1.29s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.25s/it]
+INFO:voice-chat:GLM attention implementation: eager
+INFO:voice-chat:Loading speech tokenizer and decoder on cuda:1
+/root/GLM-Voice-RAG-main/.venv/lib/python3.11/site-packages/torch/_jit_internal.py:872: FutureWarning: ignore(True) has been deprecated. TorchScript will now drop the function call on compilation. Use torch.jit.unused now. {}
+  warnings.warn(
+/root/GLM-Voice-RAG-main/.venv/lib/python3.11/site-packages/lightning/fabric/__init__.py:41: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+/root/GLM-Voice-RAG-main/.venv/lib/python3.11/site-packages/diffusers/models/lora.py:393: FutureWarning: `LoRACompatibleLinear` is deprecated and will be removed in version 1.0.0. Use of `LoRACompatibleLinear` is deprecated. Please switch to PEFT backend by installing PEFT: `pip install peft`.
+  deprecate("LoRACompatibleLinear", "1.0.0", deprecation_message)
+INFO:root:input frame rate=12.5
+/root/GLM-Voice-RAG-main/.venv/lib/python3.11/site-packages/torch/nn/utils/weight_norm.py:143: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+INFO:voice-chat:Voice models ready
+GLM：4bit / cuda:0，attention eager，编解码：cuda:1，首块：25 token，matmul TF32：False
+
+样本 1/6 · 灯具连接APP--检索正常回答重复且不会读网址/question.wav
+录音：/root/GLM-Voice-RAG-main/answer_data/calls/灯具连接APP--检索正常回答重复且不会读网址/question.wav，输入语音 token：69，编码与现有路径一致。
+测量首块，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 2250.0 ms，中位数 2253.6 ms
+  GLM 中位数：生成 1833.5 ms，首 token 130.7 ms
+  GLM 首 token 后的生成速度中位数：21.72 token/s
+  最快一轮：GLM 38 token，语音 25 token，生成音频 1.59 秒
+  Mel + 语音编码              17.2 ms
+  输入 token 组装与交接           8.6 ms
+  GLM 生成                1832.3 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                   387.8 ms
+  HiFT                    12.4 ms
+测量整段，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 21184.7 ms，中位数 21268.4 ms
+  GLM 中位数：生成 19527.3 ms，首 token 130.7 ms
+  GLM 首 token 后的生成速度中位数：21.50 token/s
+  最快一轮：GLM 418 token，语音 348 token，生成音频 27.83 秒
+  Mel + 语音编码              16.3 ms
+  输入 token 组装与交接           7.5 ms
+  GLM 生成               19440.2 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                  1608.5 ms
+  HiFT                    97.8 ms
+
+样本 2/6 · 国外项目采购/question.wav
+录音：/root/GLM-Voice-RAG-main/answer_data/calls/国外项目采购/question.wav，输入语音 token：48，编码与现有路径一致。
+测量首块，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 2237.7 ms，中位数 2245.7 ms
+  GLM 中位数：生成 1826.3 ms，首 token 110.1 ms
+  GLM 首 token 后的生成速度中位数：21.56 token/s
+  最快一轮：GLM 38 token，语音 25 token，生成音频 1.59 秒
+  Mel + 语音编码              12.2 ms
+  输入 token 组装与交接           4.0 ms
+  GLM 生成                1823.8 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                   388.9 ms
+  HiFT                    12.6 ms
+测量整段，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 23722.1 ms，中位数 23726.9 ms
+  GLM 中位数：生成 21469.0 ms，首 token 110.0 ms
+  GLM 首 token 后的生成速度中位数：21.58 token/s
+  最快一轮：GLM 462 token，语音 398 token，生成音频 31.83 秒
+  Mel + 语音编码              11.6 ms
+  输入 token 组装与交接           3.2 ms
+  GLM 生成               21461.6 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                  2113.7 ms
+  HiFT                   112.8 ms
+
+样本 3/6 · 加盟/question.wav
+录音：/root/GLM-Voice-RAG-main/answer_data/calls/加盟/question.wav，输入语音 token：34，编码与现有路径一致。
+测量首块，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 2245.9 ms，中位数 2248.4 ms
+  GLM 中位数：生成 1829.5 ms，首 token 109.2 ms
+  GLM 首 token 后的生成速度中位数：21.51 token/s
+  最快一轮：GLM 38 token，语音 25 token，生成音频 1.59 秒
+  Mel + 语音编码              11.1 ms
+  输入 token 组装与交接           2.5 ms
+  GLM 生成                1827.9 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                   393.7 ms
+  HiFT                    12.8 ms
+测量整段，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 10762.0 ms，中位数 10769.0 ms
+  GLM 中位数：生成 10126.7 ms，首 token 106.2 ms
+  GLM 首 token 后的生成速度中位数：21.66 token/s
+  最快一轮：GLM 218 token，语音 183 token，生成音频 14.63 秒
+  Mel + 语音编码              10.6 ms
+  输入 token 组装与交接           2.1 ms
+  GLM 生成               10118.5 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.2 ms
+  Flow                   579.1 ms
+  HiFT                    53.4 ms
+
+样本 4/6 · 品牌合作/question.wav
+录音：/root/GLM-Voice-RAG-main/answer_data/calls/品牌合作/question.wav，输入语音 token：25，编码与现有路径一致。
+测量首块，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 1987.4 ms，中位数 1991.5 ms
+  GLM 中位数：生成 1582.0 ms，首 token 105.3 ms
+  GLM 首 token 后的生成速度中位数：21.69 token/s
+  最快一轮：GLM 33 token，语音 25 token，生成音频 1.59 秒
+  Mel + 语音编码               9.2 ms
+  输入 token 组装与交接           0.6 ms
+  GLM 生成                1578.2 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                   387.2 ms
+  HiFT                    12.5 ms
+测量整段，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 2500.6 ms，中位数 2505.9 ms
+  GLM 中位数：生成 2090.0 ms，首 token 108.4 ms
+  GLM 首 token 后的生成速度中位数：21.70 token/s
+  最快一轮：GLM 44 token，语音 35 token，生成音频 2.80 秒
+  Mel + 语音编码               9.2 ms
+  输入 token 组装与交接           0.6 ms
+  GLM 生成                2088.6 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                   385.8 ms
+  HiFT                    16.5 ms
+
+样本 5/6 · 如何采购/question.wav
+录音：/root/GLM-Voice-RAG-main/answer_data/calls/如何采购/question.wav，输入语音 token：35，编码与现有路径一致。
+测量首块，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 2229.8 ms，中位数 2233.2 ms
+  GLM 中位数：生成 1819.4 ms，首 token 108.7 ms
+  GLM 首 token 后的生成速度中位数：21.63 token/s
+  最快一轮：GLM 38 token，语音 25 token，生成音频 1.59 秒
+  Mel + 语音编码              11.2 ms
+  输入 token 组装与交接           2.4 ms
+  GLM 生成                1817.9 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.2 ms
+  Flow                   387.2 ms
+  HiFT                    13.1 ms
+测量整段，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 15701.2 ms，中位数 15724.2 ms
+  GLM 中位数：生成 14572.1 ms，首 token 106.3 ms
+  GLM 首 token 后的生成速度中位数：21.64 token/s
+  最快一轮：GLM 314 token，语音 265 token，生成音频 21.20 秒
+  Mel + 语音编码              10.9 ms
+  输入 token 组装与交接           2.0 ms
+  GLM 生成               14548.4 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.2 ms
+  Flow                  1063.8 ms
+  HiFT                    77.4 ms
+
+样本 6/6 · 以旧换新/question.wav
+录音：/root/GLM-Voice-RAG-main/answer_data/calls/以旧换新/question.wav，输入语音 token：43，编码与现有路径一致。
+测量首块，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 2231.0 ms，中位数 2232.0 ms
+  GLM 中位数：生成 1819.1 ms，首 token 109.4 ms
+  GLM 首 token 后的生成速度中位数：21.64 token/s
+  最快一轮：GLM 38 token，语音 25 token，生成音频 1.59 秒
+  Mel + 语音编码              12.1 ms
+  输入 token 组装与交接           3.6 ms
+  GLM 生成                1817.8 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.2 ms
+  Flow                   387.8 ms
+  HiFT                    12.9 ms
+测量整段，预热 2 次，正式 5 次
+  PCM 在 GPU → 波形在 GPU：最快 18587.1 ms，中位数 18616.1 ms
+  GLM 中位数：生成 17195.6 ms，首 token 109.4 ms
+  GLM 首 token 后的生成速度中位数：21.53 token/s
+  最快一轮：GLM 369 token，语音 310 token，生成音频 24.80 秒
+  Mel + 语音编码              11.6 ms
+  输入 token 组装与交接           2.8 ms
+  GLM 生成               17170.1 ms
+  筛选输出语音 token             0.1 ms
+  解码前 token 交接             0.1 ms
+  Flow                  1295.3 ms
+  HiFT                    90.5 ms
+
+先取各录音的重复测量中位数，再取录音间中位数。
+  首块 6/6：GLM 1822.8 ms，首 token 109.3 ms，总耗时 2239.4 ms
+    GLM 首 token 后 21.63 token/s
+  整段 6/6：GLM 15883.8 ms，首 token 108.9 ms，总耗时 17170.1 ms
+    GLM 首 token 后 21.61 token/s
