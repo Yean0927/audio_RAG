@@ -18,11 +18,12 @@ from websockets import connect
 from websockets.exceptions import WebSocketException
 
 
-ROOT = Path(__file__).resolve().parent
+from voice_service import ROOT
 INPUT_RATE = 16000
 OUTPUT_RATE = 22050
 # Match the current scheduler in call_web/call.js.
 PLAYBACK_LEAD_MS = 20
+FIRST_STREAM_PLAYBACK_LEAD_MS = 120
 
 
 def read_recording(path):
@@ -98,7 +99,8 @@ async def measure(url, wav, duration):
                 if not pcm or len(pcm) % 2:
                     raise ValueError("服务端返回了无效的 PCM 音频块。")
                 decoded = (time.perf_counter() - started) * 1000
-                play_at = play_until if play_until > decoded else decoded + PLAYBACK_LEAD_MS
+                lead = PLAYBACK_LEAD_MS if chunks else FIRST_STREAM_PLAYBACK_LEAD_MS
+                play_at = play_until if play_until > decoded else decoded + lead
                 audio_ms = len(pcm) / 2 / OUTPUT_RATE * 1000
                 chunks.append({"arrival_ms": arrival, "client_unpack_ms": decoded - arrival,
                                "audio_ms": audio_ms, "play_at_ms": play_at,

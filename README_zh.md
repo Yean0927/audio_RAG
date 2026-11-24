@@ -23,6 +23,18 @@ E2E RAG for GLM-4-Voice: A Case Study
 
 ---
 
+## 语音服务与仓库结构
+
+浏览器通话使用 `bash start_voice_call.sh`，手动录音调试使用 `python voice_web_demo.py`。环境配置、模型选择和 vLLM 启动见[语音服务指南](VOICE_CHAT_zh.md)。
+
+| 目录 | 内容 |
+| --- | --- |
+| `voice_service/` | 模型后端、共享命令行参数、检索和音频处理 |
+| `call_web/` | 浏览器通话页面 |
+| `tools/` | 模型下载、vLLM 安装、性能分析和 FAQ 评测。请在仓库根目录用 `python -m tools.<模块名>` 运行 |
+| `src/`、`examples/` | 研究实现和用例 |
+| `tests/` | 服务、模型后端和浏览器音频测试 |
+
 
 ## ✨ 模型组件介绍
 

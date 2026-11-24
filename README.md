@@ -27,6 +27,18 @@ An **end-to-end retrieval-augmented generation (E2E RAG)** speech dialogue syste
 
 ---
 
+## Voice service and repository layout
+
+Run `bash start_voice_call.sh` for browser calls or `python voice_web_demo.py` for manual audio testing. See the [voice service guide](VOICE_CHAT_zh.md) for setup, backends, and vLLM launch commands.
+
+| Directory | Contents |
+| --- | --- |
+| `voice_service/` | Model backends, shared CLI arguments, retrieval, and audio processing |
+| `call_web/` | Browser call interface |
+| `tools/` | Model downloads, vLLM setup, profiling, and FAQ evaluation. Run modules from the repository root with `python -m tools.<module>` |
+| `src/`, `examples/` | Research implementation and examples |
+| `tests/` | Service, backend, and browser audio tests |
+
 
 ## ✨ Overview of the Base Models
 

@@ -11,7 +11,9 @@ from tempfile import TemporaryDirectory
 import time
 from types import SimpleNamespace
 
-from voice_web_demo import ROOT, STREAM_BLOCK_SIZES, VoiceBackend
+from voice_service import ROOT
+from voice_service.backend import STREAM_BLOCK_SIZES
+from voice_service.glm import VoiceBackend
 
 
 AUDIO_TOKEN = re.compile(r"<\|audio_(\d+)\|>")

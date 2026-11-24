@@ -1,6 +1,8 @@
 """CPU-only protocol tests: no CUDA, network downloads, or model weights."""
 import base64
+from contextlib import ExitStack
 import io
+import json
 from pathlib import Path
 import struct
 import sys
@@ -11,11 +13,13 @@ import unittest
 import wave
 import os
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from fastapi.testclient import TestClient
-from voice_call_server import create_app, parse_args, validate_wav, load_config, prepare_decoder
+from voice_call_server import FAREWELL_TEXT, create_app, parse_args, validate_wav, load_config, prepare_decoder
+from voice_service.semantic_vad import TurnEvent
 from voice_web_demo import InferenceCancelled, check_cancelled, make_prompt
 
 
@@ -48,7 +52,7 @@ class FakeBackend:
 
     def synthesize_greeting(self, greeting, language):
         self.greetings.append((greeting, language))
-        return recording(rate=22050)
+        return recording(seconds=1 if greeting == FAREWELL_TEXT else 0.6, rate=22050)
 
     def answer(self, source, use_rag, knowledge, knowledge_file, language, history, cancel_event=None,
                on_audio=None, profile=None, stream_block_sizes=None):
@@ -69,7 +73,7 @@ class FakeBackend:
             profile("chunk_pcm_ready", chunk=2, packet=2)
         if on_audio is not None:
             on_audio(b"\x02\x00")
-        path = self.folder / "reply.wav"
+        path = self.folder / f"{uuid4().hex}.wav"
         path.write_bytes(recording())
         record = {"text": f"客服回复 {len(history) + 1}",
                   "question_tokens": "<|begin_of_audio|><|audio_42|><|audio_71|><|end_of_audio|>",
@@ -112,29 +116,127 @@ class CallTests(unittest.TestCase):
             self.assertNotEqual(message["type"], "error", message)
         self.fail("No reply")
 
+    def test_semantic_page_is_the_only_call_entry(self):
+        with self.client() as client:
+            for path in ("/", "/manual"):
+                response = client.get(path, follow_redirects=False)
+                self.assertEqual(response.status_code, 307)
+                self.assertEqual(response.headers["location"], "/omni_vad")
+            self.assertEqual(client.get("/duplex").status_code, 404)
+            self.assertEqual(client.get("/duplex?vad=semantic").status_code, 404)
+            response = client.get("/omni_vad")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn('id="history-heading"', response.text)
+            self.assertNotIn('id="input-check"', response.text)
+
+            self.wait_ready(client)
+            with client.websocket_connect("/api/call?duplex=1&model_endpoint=1") as socket:
+                error = socket.receive_json()
+                self.assertEqual(error["type"], "error")
+                self.assertIn("/omni_vad", error["message"])
+            with client.websocket_connect("/api/call?vad=semantic") as socket:
+                self.assertIn("--smart-turn-model", socket.receive_json()["message"])
+
+    def test_semantic_call_discards_noise_and_submits_filtered_speech(self):
+        weights = Path(self.temp.name) / "smart-turn.onnx"
+        weights.touch()
+        self.config["smart_turn_model"] = str(weights)
+        noise = b"\x01\x00" * 1600
+        speech = b"\xe8\x03" * 3200
+        filtered = b"\xd0\x07" * 2400
+        speech_filter = Mock(side_effect=[b"", filtered])
+        app = create_app(self.args, self.config, self.backend, speech_filter=speech_filter)
+
+        with patch("voice_call_server.SmartTurn") as smart_turn, patch("voice_call_server.SemanticVAD") as vad:
+            vad.return_value.append = AsyncMock(side_effect=[
+                [TurnEvent("speech_start"), TurnEvent("silence_timeout", noise)],
+                [TurnEvent("speech_start"), TurnEvent("semantic_complete", speech, 0.9)],
+            ])
+            vad.return_value.close = AsyncMock()
+            with TestClient(app) as client:
+                self.wait_ready(client)
+                with client.websocket_connect("/api/call?vad=semantic&ack=1") as socket:
+                    hello = socket.receive_json()
+                    self.assertTrue(hello["semantic_vad"])
+                    self.assertTrue(hello["speech_filter"])
+                    socket.send_bytes(noise)
+                    self.assertEqual(socket.receive_json(), {"type": "speech_started", "id": 1})
+                    self.assertEqual(socket.receive_json(), {"type": "speech_discarded", "id": 1})
+                    self.assertEqual(self.backend.calls, [])
+
+                    socket.send_bytes(speech)
+                    self.assertEqual(socket.receive_json(), {"type": "speech_started", "id": 2})
+                    self.assertEqual(socket.receive_json(), {
+                        "type": "speech_stopped", "id": 2, "reason": "semantic_complete",
+                    })
+                    acknowledgement = socket.receive_json()
+                    self.assertEqual(acknowledgement["type"], "utterance_received")
+                    self.assertEqual(base64.b64decode(acknowledgement["input_pcm"]), filtered)
+                    self.assertEqual(self.reply(socket)["text"], "客服回复 1")
+                    socket.send_json({"type": "hangup"})
+
+        smart_turn.assert_called_once_with(weights.resolve())
+        self.assertEqual([entry.args[0] for entry in speech_filter.call_args_list], [noise, speech])
+        saved, = (Path(self.temp.name) / "incoming").glob("*/*.wav")
+        with wave.open(str(saved), "rb") as audio:
+            self.assertEqual(audio.readframes(audio.getnframes()), filtered)
+
+    def test_feedback_archives_the_selected_turn_once(self):
+        archive = Path(self.temp.name) / "数据飞轮"
+        record_id = str(uuid4())
+        question, answer = recording(), recording(rate=24000)
+        retrieval = {"selected_metric": "cosine", "cosine": [{"rank": 1, "score": 0.8, "passage": "售后时间"}]}
+        payload = {
+            "id": record_id, "turn": 2, "reply": "客服回复", "retrieval": retrieval,
+            "question_wav": base64.b64encode(question).decode(), "reply_wav": base64.b64encode(answer).decode(),
+        }
+        with patch("voice_call_server.FEEDBACK_DIR", archive), self.client() as client:
+            rejected = client.post("/api/feedback", json=payload, headers={"origin": "https://unrelated.example"})
+            self.assertEqual(rejected.status_code, 403)
+            malformed = client.post("/api/feedback", json={**payload, "id": "../invalid"})
+            self.assertEqual(malformed.status_code, 422)
+            bad_wav = client.post("/api/feedback", json={**payload, "reply_wav": "invalid base64!"})
+            self.assertEqual(bad_wav.status_code, 422)
+            self.assertFalse(archive.exists())
+
+            for _ in range(2):
+                saved = client.post("/api/feedback", json=payload)
+                self.assertEqual(saved.status_code, 200, saved.text)
+                self.assertEqual(saved.json()["path"], f"数据飞轮/{record_id}")
+
+        folder = archive / record_id
+        self.assertEqual(list(archive.iterdir()), [folder])
+        metadata = json.loads((folder / "record.json").read_text(encoding="utf-8"))
+        self.assertEqual(metadata["turn"], 2)
+        self.assertEqual(metadata["reply"], payload["reply"])
+        self.assertEqual(metadata["retrieval"], retrieval)
+        self.assertEqual((folder / metadata["question_audio"]).read_bytes(), question)
+        self.assertEqual((folder / metadata["reply_audio"]).read_bytes(), answer)
+
     def test_model_greeting_is_prepared_once_and_cached_across_restarts(self):
+        opening_wav = recording(rate=22050)
+
         def connect():
             with self.client() as client:
                 self.wait_ready(client)
                 with client.websocket_connect("/api/call?stream=1") as socket:
                     hello = socket.receive_json()
                     self.assertEqual(hello["greeting"], self.config["greeting"])
-                    self.assertEqual(base64.b64decode(hello["greeting_audio"]), recording(rate=22050))
+                    self.assertEqual(base64.b64decode(hello["greeting_audio"], validate=True), opening_wav)
                     socket.send_json({"type": "hangup"})
 
         connect()
         connect()
-        self.assertEqual(self.backend.greetings, [("您好", "zh")])
+        self.assertEqual(self.backend.greetings, [("您好", "zh"), (FAREWELL_TEXT, "zh")])
         directory = Path(self.temp.name) / "greetings"
-        path, = directory.glob("*.wav")
-        self.assertEqual(path.read_bytes(), recording(rate=22050))
+        path, = (clip for clip in directory.glob("*.wav") if clip.read_bytes() == opening_wav)
         path.write_bytes(b"truncated")
         connect()
-        self.assertEqual(self.backend.greetings, [("您好", "zh"), ("您好", "zh")])
+        self.assertEqual(self.backend.greetings, [("您好", "zh"), (FAREWELL_TEXT, "zh"), ("您好", "zh")])
         self.config["greeting"] = "欢迎来电"
         connect()
         self.assertEqual(self.backend.greetings[-1], ("欢迎来电", "zh"))
-        self.assertEqual(len(list(directory.iterdir())), 2)
+        self.assertEqual(len(list(directory.iterdir())), 3)
 
     def test_auto_turns_history_knowledge_and_fresh_call(self):
         with self.client() as client:
@@ -144,7 +246,7 @@ class CallTests(unittest.TestCase):
                 self.assertEqual(client.get("/assets/" + name).status_code, 200)
             with client.websocket_connect("/api/call") as socket:
                 self.assertEqual(socket.receive_json()["type"], "ready")
-                self.assertFalse(client.get("/api/health").json()["available"])
+                self.assertEqual(client.get("/api/health").json()["available_slots"], 4)
                 self.send_turn(socket, 1)
                 first = self.reply(socket)
                 self.assertEqual(first["text"], "客服回复 1")
@@ -248,20 +350,60 @@ class CallTests(unittest.TestCase):
             self.assertTrue(self.backend.cancelled.wait(2))
             self.assertTrue(client.get("/api/health").json()["available"])
 
-    def test_one_call_at_a_time_and_origin_rejection(self):
+    def test_five_call_limit_rejects_the_sixth_and_reuses_freed_slot(self):
+        with self.client() as client, ExitStack() as calls:
+            self.wait_ready(client)
+            self.assertEqual(client.get("/api/health").json()["max_calls"], 5)
+            sockets = []
+            for _ in range(5):
+                socket = calls.enter_context(client.websocket_connect("/api/call"))
+                self.assertEqual(socket.receive_json()["type"], "ready")
+                sockets.append(socket)
+            self.assertEqual(client.get("/api/health").json()["available_slots"], 0)
+            with client.websocket_connect("/api/call") as sixth:
+                self.assertEqual(sixth.receive_json()["type"], "error")
+                self.assertEqual(sixth.receive()["code"], 1013)
+
+            sockets[0].send_json({"type": "hangup"})
+            self.assertEqual(sockets[0].receive()["type"], "websocket.close")
+            self.assertEqual(client.get("/api/health").json()["available_slots"], 1)
+            with client.websocket_connect("/api/call") as replacement:
+                self.assertEqual(replacement.receive_json()["type"], "ready")
+                self.assertEqual(client.get("/api/health").json()["available_slots"], 0)
+
+    def test_five_calls_share_one_concurrent_backend_with_independent_histories(self):
+        self.backend.supports_concurrent_inference = True
+        first_turns = threading.Barrier(5)
+        answer = self.backend.answer
+
+        def concurrent_answer(source, use_rag, knowledge, knowledge_file, language, history, **options):
+            if not history:
+                first_turns.wait(timeout=5)
+            return answer(source, use_rag, knowledge, knowledge_file, language, history, **options)
+
+        with patch.object(self.backend, "answer", concurrent_answer), self.client() as client, ExitStack() as calls:
+            self.wait_ready(client)
+            sockets = [calls.enter_context(client.websocket_connect("/api/call?stream=1")) for _ in range(5)]
+            for socket in sockets:
+                self.assertEqual(socket.receive_json()["type"], "ready")
+                self.send_turn(socket, 1)
+            for socket in sockets:
+                self.assertEqual(self.reply(socket)["text"], "客服回复 1")
+
+            for socket in sockets[:2]:
+                self.send_turn(socket, 2)
+                self.assertEqual(self.reply(socket)["text"], "客服回复 2")
+
+    def test_rejects_unrelated_origin(self):
         with self.client() as client:
             self.wait_ready(client)
-            with client.websocket_connect("/api/call") as first:
-                first.receive_json()
-                with client.websocket_connect("/api/call") as second:
-                    self.assertEqual(second.receive_json()["type"], "error")
             from starlette.websockets import WebSocketDisconnect
             with self.assertRaises(WebSocketDisconnect):
                 with client.websocket_connect("/api/call", headers={"origin": "https://unrelated.example"}):
                     pass
 
     def test_two_replicas_infer_concurrently_and_release_independently(self):
-        args = parse_args(["--output-dir", self.temp.name, "--replica-gpus", "0,1"])
+        args = parse_args(["--output-dir", self.temp.name, "--replica-gpus", "0,1", "--max-calls", "2"])
         first_backend, second_backend = self.backend, FakeBackend(self.temp.name)
         first_backend.block_first = second_backend.block_first = True
         with patch("voice_call_server.build_backends", return_value=[first_backend, second_backend]):
@@ -285,6 +427,7 @@ class CallTests(unittest.TestCase):
                     with client.websocket_connect("/api/call") as third:
                         self.assertEqual(third.receive_json()["type"], "error")
                     second.send_json({"type": "hangup"})
+                    self.assertEqual(second.receive()["type"], "websocket.close")
                 self.assertTrue(second_backend.cancelled.wait(2))
                 self.assertFalse(first_backend.cancelled.is_set())
                 with client.websocket_connect("/api/call") as replacement:

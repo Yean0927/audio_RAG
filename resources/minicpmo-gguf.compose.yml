@@ -1,0 +1,11 @@
+services:
+  cpp-worker-backend:
+    build:
+      args:
+        CMAKE_CUDA_ARCHITECTURES: "86"
+        LLAMA_OMNI_REFSPEC: "350a835d5f8215145aa210a7df0f67e8877b5d6e"
+        LLAMA_OMNI_REF: "FETCH_HEAD"
+    volumes:
+      - ./assets/ref_audio/ref_minicpm_signature.wav:/app/tools/omni/assets/default_ref_audio/default_ref_audio.wav:ro
+  gateway:
+    command: ["--host", "0.0.0.0", "--port", "8006", "--internal-port", "8007", "--http"]

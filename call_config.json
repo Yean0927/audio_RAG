@@ -1,8 +1,10 @@
 {
   "title": "语音客服",
   "greeting": "亲亲，小雷很高兴为您服务，麻烦详细描述下您要咨询的问题。",
+  "farewell_enabled": false,
+  "smart_turn_model": "./smart-turn-v3.2-cpu.onnx",
   "language": "zh",
-  "system_prompt": "你是一位耐心、专业的雷士灯具客服。优先解决客户当前的问题；需求不清楚时，简短询问一个关键问题。每次回答控制在一到两句话，适合电话交流。不要编造订单、价格、售后政策或已完成的操作。需要人工处理时，建议客户联系商家的人工客服。",
+  "system_prompt": "你是一位耐心、专业的雷士灯具客服。请依据提供的资料回答按原文复述不要简化或者润色。如果资料中没有再引用预训练知识。若未识别到明确用户文字输入，请礼貌提示用户重新输入。",
   "knowledge_file": "resources/customer_faq.md",
   "silence_ms": 850,
   "min_speech_ms": 260

@@ -1,9 +1,14 @@
 
 /answer_data/calls/
 /answer_data/incoming/
+/answer_data/web/
+/answer_data/profiles/
+/answer_data/evaluations/
+/数据飞轮/
 
 # Python 虚拟环境
 /.venv/
+/.venv-*/
 /venv/
 
 # 模型权重和下载缓存
@@ -21,5 +26,3 @@ pytorch_model*.bin
 ._*
 __pycache__/
 *.pyc
-
-/answer_data/web/30889a0ad4154936939bb9739954b06e/question.wav

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f5f8f6">
   <title>语音客服</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/assets/style.css?v=call-modes">
+  <link rel="stylesheet" href="./style.css?v=faq-links">
 </head>
 <body data-phase="idle">
   <header class="header">
@@ -14,60 +14,86 @@
     <span class="service-badge"><i id="service-dot"></i><span id="service-label">正在准备</span></span>
   </header>
   <main>
-    <section class="call-card" aria-labelledby="heading">
-      <div class="eyebrow">很高兴为您服务</div>
-      <div class="avatar-wrap" aria-hidden="true">
-        <div class="halo halo-one"></div><div class="halo halo-two"></div>
-        <div class="avatar">
-          <svg width="74" height="74" viewBox="0 0 80 80" fill="none">
-            <path d="M18 43V36a22 22 0 0 1 44 0v7" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
-            <rect x="12" y="36" width="13" height="23" rx="6.5" fill="currentColor"/>
-            <rect x="55" y="36" width="13" height="23" rx="6.5" fill="currentColor"/>
-            <path d="M61 57c0 8-8 12-18 12" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-            <rect x="34" y="65" width="13" height="7" rx="3.5" fill="currentColor"/>
-            <path d="M33 39v8m7-13v18m7-13v8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-          </svg>
+    <div class="call-column">
+      <section class="call-card" aria-labelledby="heading">
+        <div class="eyebrow">很高兴为您服务</div>
+        <div class="avatar-wrap" aria-hidden="true">
+          <div class="halo halo-one"></div><div class="halo halo-two"></div>
+          <div class="avatar">
+            <svg width="74" height="74" viewBox="0 0 80 80" fill="none">
+              <path d="M18 43V36a22 22 0 0 1 44 0v7" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+              <rect x="12" y="36" width="13" height="23" rx="6.5" fill="currentColor"/>
+              <rect x="55" y="36" width="13" height="23" rx="6.5" fill="currentColor"/>
+              <path d="M61 57c0 8-8 12-18 12" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+              <rect x="34" y="65" width="13" height="7" rx="3.5" fill="currentColor"/>
+              <path d="M33 39v8m7-13v18m7-13v8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="voice-bars"><i></i><i></i><i></i><i></i><i></i></div>
         </div>
-        <div class="voice-bars"><i></i><i></i><i></i><i></i><i></i></div>
+        <h1 id="heading">随时为您解答</h1>
+        <p id="description" class="description">点击开始，像打电话一样交流</p>
+        <div class="call-meta"><span class="connection-dot"></span><span id="timer">语音连接</span></div>
+        <button id="call-button" type="button" disabled>
+          <svg class="phone-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="m8.1 3.7 1.6 3.5c.2.5.1 1-.3 1.4l-1.6 1.6a16 16 0 0 0 6 6l1.6-1.6c.4-.4.9-.5 1.4-.3l3.5 1.6c.5.2.8.7.7 1.2l-.5 3c-.1.6-.6 1-1.2 1C10.2 21 3 13.8 2.9 4.7c0-.6.4-1.1 1-1.2l3-.5c.5-.1 1 .2 1.2.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+          <span id="button-label">客服准备中</span>
+        </button>
+        <p class="caption" id="caption" role="status" aria-live="polite">正在连接语音客服，请稍候。</p>
+      </section>
+      <p class="privacy"><span aria-hidden="true">⌁</span> 麦克风仅在通话期间开启</p>
+    </div>
+    <section class="history-panel" aria-labelledby="history-heading">
+      <header class="history-header">
+        <h2 id="history-heading">对话记录</h2>
+      </header>
+      <div id="history-scroll" class="history-scroll" tabindex="0" aria-label="对话记录列表">
+        <p id="history-empty" class="history-empty">开始通话后，可在这里回听每轮语音并查看对应的检索结果。</p>
+        <ol id="history-turns" class="history-turns"></ol>
       </div>
-      <h1 id="heading">随时为您解答</h1>
-      <p id="description" class="description">点击开始，像打电话一样交流</p>
-      <div class="call-meta"><span class="connection-dot"></span><span id="timer">语音连接</span></div>
-      <button id="call-button" type="button" disabled>
-        <svg class="phone-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="m8.1 3.7 1.6 3.5c.2.5.1 1-.3 1.4l-1.6 1.6a16 16 0 0 0 6 6l1.6-1.6c.4-.4.9-.5 1.4-.3l3.5 1.6c.5.2.8.7.7 1.2l-.5 3c-.1.6-.6 1-1.2 1C10.2 21 3 13.8 2.9 4.7c0-.6.4-1.1 1-1.2l3-.5c.5-.1 1 .2 1.2.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        </svg>
-        <span id="button-label">客服准备中</span>
-      </button>
-      <button id="start-speaking" class="turn-button" type="button" hidden>开始说话</button>
-      <button id="send-now" class="turn-button" type="button" hidden>说完了，发送</button>
-      <p class="caption" id="caption" role="status" aria-live="polite">正在连接语音客服，请稍候。</p>
-      <audio id="farewell" preload="auto" hidden></audio>
-      <div class="reply" id="reply" aria-live="polite" hidden></div>
-      <details class="input-check retrieval-check" id="retrieval-check" hidden>
-        <summary id="retrieval-summary">查看本轮检索结果</summary>
-        <div id="retrieval-results"></div>
-      </details>
-      <details class="input-check" id="input-check" hidden>
-        <summary>查看本轮录音</summary>
-        <p id="input-meta"></p>
-        <label for="input-recording">实际发送的录音</label>
-        <audio id="input-recording" controls preload="metadata"></audio>
-        <details id="input-token-details" hidden>
-          <summary id="input-token-summary">语音 token</summary>
-          <pre id="input-tokens"></pre>
-          <button id="decode-input" type="button" disabled>解码语音 token</button>
-          <p id="decode-status" role="status"></p>
-          <audio id="decoded-input" aria-label="语音 token 解码音频" controls preload="metadata" hidden></audio>
-        </details>
-      </details>
     </section>
-    <p class="privacy"><span aria-hidden="true">⌁</span> 麦克风仅在通话期间开启</p>
+    <template id="history-turn-template">
+      <li class="history-turn">
+        <div class="history-turn-header">
+          <h3 class="history-turn-heading"></h3>
+          <span class="history-status"></span>
+        </div>
+        <div class="history-message history-user">
+          <div class="history-speaker">您</div>
+          <p class="history-input-meta" hidden></p>
+          <audio class="history-input" controls preload="none" hidden></audio>
+        </div>
+        <div class="history-message history-assistant" hidden>
+          <div class="history-speaker">客服</div>
+          <p class="history-reply" hidden></p>
+          <p class="history-output-meta" hidden>已收到的语音片段</p>
+          <audio class="history-output" controls preload="none" hidden></audio>
+        </div>
+        <div class="history-links" hidden>
+          <div class="history-speaker">参考链接</div>
+          <ul></ul>
+        </div>
+        <details class="retrieval-check history-retrieval" hidden>
+          <summary></summary>
+          <div></div>
+        </details>
+        <p class="history-no-results" hidden>未收到检索结果</p>
+        <div class="history-actions" hidden>
+          <button class="history-save" type="button">保存到数据飞轮</button>
+          <span class="history-save-status" role="status"></span>
+        </div>
+      </li>
+    </template>
   </main>
-  <footer>
-    <nav aria-label="通话模式"><a href="/duplex">全双工通话</a> · <a href="/manual">按钮通话</a></nav>
-    用声音沟通，让服务更近一点
-  </footer>
-  <script type="module" src="/assets/call.js?v=backend-farewell"></script>
+  <script type="module">
+    if (location.protocol === "file:") {
+      document.getElementById("service-label").textContent = "本地预览";
+      document.getElementById("button-label").textContent = "开始通话";
+      document.getElementById("caption").textContent = "启动语音服务后，访问 http://localhost:7860/omni_vad 开始通话。";
+    } else {
+      import("/assets/call.js?v=faq-links");
+    }
+  </script>
 </body>
 </html>

@@ -3,6 +3,7 @@ import numpy as np
 import re
 import os
 import sys
+import threading
 
 sys.path.insert(0, "./cosyvoice")
 sys.path.insert(0, "./third_party/Matcha-TTS")
@@ -41,6 +42,7 @@ def fade_in_out(fade_in_mel, fade_out_mel, window):
 class AudioDecoder:
     def __init__(self, config_path, flow_ckpt_path, hift_ckpt_path, device="cuda"):
         self.device = device
+        self.lock = threading.Lock()
 
         with open(config_path, 'r') as f:
             self.scratch_configs = load_hyperpyyaml(f)
@@ -73,6 +75,11 @@ class AudioDecoder:
         self.default_embedding = torch.zeros(1, 192, device=self.device)
 
     def token2wav(self, token, uuid, prompt_token=None, prompt_feat=None, embedding=None, finalize=False):
+        # Flow updates a positional embedding cache and HiFT uses weight-normalization hooks.
+        with self.lock:
+            return self._token2wav(token, uuid, prompt_token, prompt_feat, embedding, finalize)
+
+    def _token2wav(self, token, uuid, prompt_token, prompt_feat, embedding, finalize):
         prompt_token = self.empty_token if prompt_token is None else prompt_token
         prompt_feat = self.empty_mel if prompt_feat is None else prompt_feat
         embedding = self.default_embedding if embedding is None else embedding

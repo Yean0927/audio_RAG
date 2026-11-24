@@ -1,28 +1,89 @@
 """Backend contracts using CPU tensors and mocked model runtimes."""
+import asyncio
+import base64
 from contextlib import nullcontext, redirect_stderr
 import io
 import json
+import os
 from pathlib import Path
+import struct
 import sys
 import tempfile
 import threading
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
+import wave
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import httpx
 import torch
 import torchaudio
 
-from voice_audio_models import AudioModelBackend, KimiAudioBackend, QwenOmniBackend, QWEN_SYSTEM
-from voice_backend import InferenceCancelled, VoiceReply, pcm16_bytes
+from voice_service.api import MingAPIBackend, MiniCPMOAPIBackend, QwenOmniAPIBackend
+from voice_service.audio_models import AudioModelBackend, QwenOmniBackend, QWEN_SYSTEM
+from voice_service.backend import InferenceCancelled, VoiceReply, pcm16_bytes
 from voice_call_server import parse_args, prepare_decoder
 from voice_web_demo import VoiceBackend, create_backend
 from test_voice_call import recording
 
 
+class SpeechStream(httpx.AsyncByteStream):
+    def __init__(self, chunks):
+        self.chunks = chunks
+        self.closed = False
+
+    def __aiter__(self):
+        return self.chunks
+
+    async def aclose(self):
+        self.closed = True
+        await self.chunks.aclose()
+
+
+def speech_event(event_type, **fields):
+    return f"data: {json.dumps({'type': event_type, **fields})}\r\n\r\n".encode()
+
+
 class BackendTests(unittest.TestCase):
+    def test_vllm_reply_stream_filters_ids_and_decodes_multiple_blocks(self):
+        backend = VoiceBackend(parse_args(["--vllm-base-url", "http://127.0.0.1:18000/v1"]))
+        backend.vllm = Mock()
+        backend.vllm_context_length = 8192
+        backend.vllm_stop_ids = [4]
+        backend.audio_vocab = (1000, 100)
+        backend.speech_device = torch.device("cpu")
+        backend.tokenizer = Mock(return_value=SimpleNamespace(input_ids=torch.tensor([[1, 2, 1000, 3]])))
+        backend.tokenizer.convert_tokens_to_ids.side_effect = {
+            "<|begin_of_audio|>": 2, "<|end_of_audio|>": 3,
+        }.__getitem__
+        backend.tokenizer.decode.side_effect = lambda ids, **kwargs: "你好" if 10 in ids else ""
+        backend.decoder = SimpleNamespace(token_overlap_len=5, mel_cache_len=1,
+                                          hift_cache_dict={}, mel_overlap_dict={})
+
+        def decode(block, *, finalize, **kwargs):
+            playable = block if finalize else block[:, :-5]
+            return playable.float() / 1000, torch.zeros(1, 80, 2)
+
+        backend.decoder.token2wav = Mock(side_effect=decode)
+
+        def generate(prompt_ids, max_tokens, *, on_tokens, **kwargs):
+            self.assertEqual(prompt_ids, [1, 2, 1007, 3])
+            self.assertEqual(kwargs["stop_token_ids"], [4])
+            ids = [10, 1100, *range(1000, 1066)]
+            on_tokens(ids)
+            return ids
+
+        backend.vllm.generate.side_effect = generate
+        chunks = []
+        reply = backend.generate_reply(None, torch.tensor([[7]]), [], "", "zh", None, chunks.append, None, (25,))
+        self.assertEqual(reply.text, "你好")
+        calls = backend.decoder.token2wav.call_args_list
+        self.assertEqual([call.args[0].size(1) for call in calls], [25, 25, 25, 6])
+        torch.testing.assert_close(reply.waveform, torch.arange(66).reshape(1, -1).float() / 1000)
+        self.assertEqual(b"".join(chunks), pcm16_bytes(reply.waveform))
+
     def test_glm_stream_reuses_the_last_block_size_and_flushes_remaining_tokens(self):
         backend = VoiceBackend(parse_args([]))
         backend.speech_device = torch.device("cpu")
@@ -87,8 +148,7 @@ class BackendTests(unittest.TestCase):
     def test_backend_defaults_and_factory(self):
         for name, model, implementation in (
             ("glm", "zai-org/glm-4-voice-9b", VoiceBackend),
-            ("kimi", "moonshotai/Kimi-Audio-7B-Instruct", KimiAudioBackend),
-            ("omni", "Qwen/Qwen2.5-Omni-7B", QwenOmniBackend),
+            ("omni-local", "Qwen/Qwen2.5-Omni-7B", QwenOmniBackend),
         ):
             with self.subTest(backend=name):
                 args = parse_args(["--backend", name])
@@ -97,51 +157,258 @@ class BackendTests(unittest.TestCase):
                 self.assertEqual(args.speech_device, "cuda:1" if name == "glm" else "cuda:0")
                 self.assertEqual(args.max_new_tokens, 1024 if name == "glm" else 512)
                 self.assertIsInstance(create_backend(args), implementation)
-        args = parse_args(["--backend", "kimi", "--model-path", "/models/kimi", "--llm-device", "cuda:2"])
-        self.assertEqual((args.model_path, args.speech_device), ("/models/kimi", "cuda:2"))
+        args = parse_args(["--backend", "omni-local", "--model-path", "/models/omni", "--llm-device", "cuda:2"])
+        self.assertEqual((args.model_path, args.speech_device), ("/models/omni", "cuda:2"))
+
+    def test_local_backends_reject_unavailable_cuda_devices(self):
+        with patch("torch.cuda.is_available", return_value=True), patch("torch.cuda.device_count", return_value=1):
+            for options in (
+                ["--backend", "omni-local", "--llm-device", "cpu"],
+                ["--backend", "omni-local", "--speech-device", "cuda:1"],
+                ["--backend", "glm", "--speech-device", "cpu"],
+            ):
+                with self.subTest(options=options), self.assertRaisesRegex(RuntimeError, "不可用"):
+                    create_backend(parse_args(options)).set_devices()
 
     def test_incompatible_component_options_fail_before_loading(self):
         for options in (
-            ["--backend", "kimi", "--flow-path", "/glm"],
+            ["--backend", "omni-local", "--flow-path", "/glm"],
             ["--backend", "omni", "--tokenizer-path", "/glm"],
-            ["--backend", "kimi", "--quantization", "4bit"],
-            ["--backend", "kimi", "--attn-implementation", "sdpa"],
+            ["--backend", "omni-local", "--quantization", "4bit"],
         ):
             with self.subTest(options=options), redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
                 parse_args(options)
 
+    def test_hosted_backends_send_audio_and_reference_and_save_speech(self):
+        for name, implementation, model, token_field, audio_count in (
+            ("ming", MingAPIBackend, "Ming-3.0-audio-flash", "max_completion_tokens", 1),
+            ("omni", QwenOmniAPIBackend, "Qwen/Qwen3-Omni-30B-A3B-Instruct", "max_tokens", 2),
+        ):
+            with self.subTest(backend=name), tempfile.TemporaryDirectory() as directory:
+                args = parse_args(["--backend", name, "--output-dir", directory])
+                backend = create_backend(args)
+                self.assertIsInstance(backend, implementation)
+                source = Path(directory) / "input.wav"
+                source.write_bytes(recording())
+                reply_text = "请在七天内申请。"
+                context = "退货申请限七天。"
+                backend.retrieve = Mock(return_value={"selected_metric": "euclidean", "euclidean": [
+                    {"rank": 1, "score": 0.1, "passage": context},
+                ]})
+                first_pcm = b"\xe8\x03" * 120
+                second_pcm = b"\x18\xfc" * 120
+                audio = Mock()
+
+                async def chunks():
+                    if name == "ming":
+                        first_event = speech_event("speech.audio.delta", audio=base64.b64encode(first_pcm).decode())
+                        yield first_event[:13]
+                        yield first_event[13:]
+                        audio.assert_called_once_with(first_pcm)
+                        yield speech_event("speech.audio.delta", audio=base64.b64encode(second_pcm).decode())
+                        yield speech_event("speech.audio.done")
+                    else:
+                        yield first_pcm[:1]
+                        audio.assert_not_called()
+                        yield first_pcm[1:]
+                        audio.assert_called_once_with(first_pcm)
+                        yield second_pcm
+
+                stream = SpeechStream(chunks())
+
+                def respond(request):
+                    self.assertEqual(request.headers["Authorization"], "Bearer test-key")
+                    payload = json.loads(request.content)
+                    if request.url.path.endswith("/chat/completions"):
+                        self.assertEqual(payload["model"], model)
+                        self.assertEqual(payload[token_field], 512)
+                        messages = payload["messages"]
+                        self.assertIn("上轮答复", json.dumps(messages, ensure_ascii=False))
+                        parts = messages[-1]["content"]
+                        self.assertIn(context, parts[1]["text"])
+                        prefix, encoded = parts[0]["audio_url"]["url"].split(",", 1)
+                        self.assertEqual(prefix, "data:audio/wav;base64")
+                        self.assertEqual(base64.b64decode(encoded)[:4], b"RIFF")
+                        self.assertEqual(json.dumps(messages).count("data:audio/wav;base64"), audio_count)
+                        return httpx.Response(200, json={"choices": [{"message": {"content": reply_text}}]})
+                    self.assertTrue(request.url.path.endswith("/audio/speech"))
+                    self.assertEqual(payload["model"], backend.tts_model)
+                    self.assertEqual(payload["input"], reply_text)
+                    self.assertEqual(payload["sample_rate"], 24000)
+                    if payload["response_format"] == "wav":
+                        self.assertNotIn("stream", payload)
+                        self.assertNotIn("stream_format", payload)
+                        return httpx.Response(200, content=recording(rate=24000))
+                    self.assertEqual(payload["response_format"], "pcm")
+                    if name == "ming":
+                        self.assertEqual(payload["stream_format"], "sse")
+                        return httpx.Response(200, headers={"Content-Type": "text/event-stream"}, stream=stream)
+                    self.assertIs(payload["stream"], True)
+                    return httpx.Response(200, headers={"Content-Type": "application/octet-stream"}, stream=stream)
+
+                client_class = httpx.AsyncClient
+                history = [{"question_path": str(source), "text": "上轮答复"}]
+                with patch.dict(os.environ, {backend.key_env: "test-key"}), \
+                        patch("voice_service.api.httpx.AsyncClient", side_effect=lambda **options: client_class(
+                            transport=httpx.MockTransport(respond), **options)):
+                    _, wav, selected, _, turns = backend.answer(source, True, "测试资料", None, "zh", history,
+                                                                 on_audio=audio)
+                    greeting = backend.synthesize_greeting(reply_text, "zh")
+                self.assertEqual(backend.speech_device.type, "cpu")
+                self.assertEqual(selected, context)
+                self.assertEqual(turns[-1]["text"], reply_text)
+                self.assertTrue(stream.closed)
+                self.assertEqual([call.args for call in audio.call_args_list], [(first_pcm,), (second_pcm,)])
+                saved, rate = torchaudio.load(wav)
+                self.assertEqual(rate, 24000)
+                self.assertEqual(saved.mul(32768).numpy().astype("<i2").tobytes(), first_pcm + second_pcm)
+                with wave.open(io.BytesIO(greeting), "rb") as saved:
+                    self.assertEqual(saved.getframerate(), 24000)
+
+    def test_hosted_backend_cancels_pending_request_before_tts(self):
+        backend = create_backend(parse_args(["--backend", "ming"]))
+        cancel_event = threading.Event()
+        cancelled = threading.Event()
+
+        async def respond(request):
+            self.assertTrue(request.url.path.endswith("/chat/completions"))
+            cancel_event.set()
+            try:
+                await asyncio.Future()
+            finally:
+                cancelled.set()
+
+        client = httpx.AsyncClient(transport=httpx.MockTransport(respond))
+        with patch.dict(os.environ, {backend.key_env: "test-key"}), \
+                patch("voice_service.api.httpx.AsyncClient", return_value=client):
+            backend.load()
+            with self.assertRaises(InferenceCancelled):
+                backend.infer([{"role": "user", "text": "你好"}], True, 64, cancel_event)
+        self.assertTrue(cancelled.is_set())
+
+    def test_minicpmo_sends_faq_and_float_audio_and_streams_speech(self):
+        from websockets.legacy.server import serve
+
+        answer = "请在七天内申请。"
+        context = "## 问题：如何退货\n答案：" + answer
+        retrieval = {"selected_metric": "cosine", "cosine": [{"rank": 1, "score": 1, "passage": context}]}
+        chunks = (struct.pack("<2f", 0.25, -0.5), struct.pack("<2f", 0.5, -0.25))
+        streamed = []
+        first_audio = threading.Event()
+
+        def on_audio(pcm):
+            streamed.append(pcm)
+            first_audio.set()
+
+        async def mock_model(socket):
+            async def send(event_type, **fields):
+                await socket.send(json.dumps({"type": event_type, **fields}))
+
+            self.assertEqual(socket.path, "/v1/realtime?mode=chat&model=MiniCPM-o-4.5-Realtime")
+            self.assertEqual(socket.request_headers["Authorization"], "Bearer test-key")
+            await send("session.queued", position=1)
+            await send("session.queue_done")
+            self.assertEqual(json.loads(await socket.recv()), {"type": "session.init", "payload": {}})
+            await send("session.created")
+            request = json.loads(await socket.recv())
+            self.assertEqual(request["type"], "input.append")
+            payload = request["input"]
+            self.assertTrue(payload["streaming"])
+            self.assertTrue(payload["tts"]["enabled"])
+            self.assertEqual(payload["generation"]["max_new_tokens"], 512)
+            history, prior_reply, question = payload["messages"]
+            self.assertEqual(prior_reply, {"role": "assistant", "content": "上轮答复"})
+            for message in (history, question):
+                audio = message["content"][0]
+                self.assertEqual(audio["type"], "audio")
+                pcm = base64.b64decode(audio["data"], validate=True)
+                self.assertEqual(len(pcm), 9600 * 4)
+                self.assertAlmostEqual(struct.unpack_from("<f", pcm, 400)[0], 1000 / 32768, delta=3e-5)
+            self.assertIn(context, question["content"][1]["text"])
+
+            await send("response.output.delta", kind="text", text=answer[:3])
+            for chunk in chunks:
+                await send("response.output.delta", kind="audio", audio=base64.b64encode(chunk).decode("ascii"))
+            self.assertTrue(await asyncio.to_thread(first_audio.wait, 3))
+            await send("response.done", text=answer, reason="turn_end")
+            self.assertEqual(json.loads(await socket.recv()), {"type": "session.close", "reason": "turn_done"})
+
+        async def run(backend, source):
+            async with serve(mock_model, "127.0.0.1", 0) as server:
+                backend.base_url = f"ws://127.0.0.1:{server.sockets[0].getsockname()[1]}/v1/realtime"
+                history = [{"question_path": str(source), "text": "上轮答复"}]
+                return await asyncio.wait_for(asyncio.to_thread(
+                    backend.answer, source, True, "测试资料", None, "zh", history, on_audio=on_audio,
+                ), timeout=10)
+
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"MAP_API_KEY": "test-key"}):
+            backend = create_backend(parse_args(["--backend", "minicpmo", "--output-dir", directory]))
+            self.assertIsInstance(backend, MiniCPMOAPIBackend)
+            source = Path(directory) / "input.wav"
+            source.write_bytes(recording(rate=24000))
+            backend.retrieve = Mock(return_value=retrieval)
+            _, wav, selected, _, turns = asyncio.run(run(backend, source))
+            self.assertEqual(backend.speech_device.type, "cpu")
+            self.assertEqual(selected, context)
+            self.assertEqual(turns[-1]["text"], answer)
+            self.assertEqual(turns[-1]["retrieval"], retrieval)
+            self.assertEqual(streamed, [struct.pack("<2h", 8192, -16384), struct.pack("<2h", 16384, -8192)])
+            saved, rate = torchaudio.load(wav)
+            self.assertEqual(rate, 24000)
+            torch.testing.assert_close(saved, torch.tensor([[0.25, -0.5, 0.5, -0.25]]), rtol=0, atol=1 / 32768)
+
+    def test_hosted_backend_cancels_stalled_tts_after_first_chunk(self):
+        backend = create_backend(parse_args(["--backend", "omni"]))
+        cancel_event = threading.Event()
+        cancelled = threading.Event()
+        first_pcm = b"\xe8\x03" * 120
+        audio = Mock()
+
+        async def chunks():
+            yield first_pcm
+            audio.assert_called_once_with(first_pcm)
+            cancel_event.set()
+            try:
+                await asyncio.Future()
+            finally:
+                cancelled.set()
+
+        stream = SpeechStream(chunks())
+        client = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(200, stream=stream)))
+        with patch.dict(os.environ, {backend.key_env: "test-key"}), \
+                patch("voice_service.api.httpx.AsyncClient", return_value=client):
+            backend.load()
+            with self.assertRaises(InferenceCancelled):
+                backend.synthesize_stream("你好", cancel_event, audio, None)
+        self.assertTrue(cancelled.is_set())
+        self.assertTrue(stream.closed)
+        audio.assert_called_once_with(first_pcm)
+
+    def test_hosted_backends_reject_incomplete_speech_streams(self):
+        for name, body, message in (
+            ("ming", speech_event("speech.audio.delta", audio="6AM="), "SSE 音频流提前断开"),
+            ("omni", b"\xe8\x03\x01", "PCM 样本不完整"),
+        ):
+            with self.subTest(backend=name):
+                backend = create_backend(parse_args(["--backend", name]))
+                client = httpx.AsyncClient(transport=httpx.MockTransport(
+                    lambda request: httpx.Response(200, content=body)))
+                audio = Mock()
+                with patch.dict(os.environ, {backend.key_env: "test-key"}), \
+                        patch("voice_service.api.httpx.AsyncClient", return_value=client):
+                    backend.load()
+                    with self.assertRaisesRegex(RuntimeError, message):
+                        backend.synthesize_stream("你好", None, audio, None)
+                audio.assert_called_once_with(b"\xe8\x03")
+
     def test_integrated_models_skip_glm_decoder_preparation(self):
         with patch("huggingface_hub.snapshot_download") as download:
-            for backend in ("kimi", "omni"):
+            for backend in ("omni-local", "ming", "omni"):
                 prepare_decoder(parse_args(["--backend", backend, "--download-models"]))
         download.assert_not_called()
 
-    def test_kimi_loads_all_components_and_retries_failed_initialization(self):
-        backend = KimiAudioBackend(parse_args(["--backend", "kimi"]))
-        backend.llm_device = torch.device("cuda:2")
-        backend.set_devices = Mock()
-        runtime = SimpleNamespace(
-            alm=Mock(), detokenizer=object(),
-            prompt_manager=SimpleNamespace(text_tokenizer=object(), audio_tokenizer=object(), whisper_model=object()),
-        )
-        factory = Mock(side_effect=[RuntimeError("load failed"), runtime])
-        with patch.dict(sys.modules, {"kimia_infer.api.kimia": SimpleNamespace(KimiAudio=factory)}), \
-                patch("torch.cuda.device", return_value=nullcontext()):
-            with self.assertRaisesRegex(RuntimeError, "load failed"):
-                backend.load()
-            self.assertFalse(backend.ready)
-            self.assertFalse(hasattr(backend, "runtime"))
-            backend.load()
-            backend.load()
-        self.assertEqual(factory.call_count, 2)
-        factory.assert_called_with(model_path=backend.args.model_path, load_detokenizer=True)
-        self.assertIs(backend.audio_tokenizer, runtime.prompt_manager.audio_tokenizer)
-        self.assertIs(backend.audio_encoder, runtime.prompt_manager.whisper_model)
-        self.assertIs(backend.decoder, runtime.detokenizer)
-        self.assertIs(backend.tokenizer, runtime.prompt_manager.text_tokenizer)
-
     def test_omni_loads_its_processor_and_full_generation_model(self):
-        backend = QwenOmniBackend(parse_args(["--backend", "omni", "--attn-implementation", "sdpa"]))
+        backend = QwenOmniBackend(parse_args(["--backend", "omni-local", "--attn-implementation", "sdpa"]))
         backend.llm_device = torch.device("cuda:2")
         backend.set_devices = Mock()
         model = Mock()
@@ -164,7 +431,7 @@ class BackendTests(unittest.TestCase):
     def test_shared_answer_preserves_rag_history_and_native_sample_rate(self):
         with tempfile.TemporaryDirectory() as directory:
             args = parse_args([
-                "--backend", "kimi", "--output-dir", directory,
+                "--backend", "omni-local", "--output-dir", directory,
                 "--retrieval-metric", "cosine", "--compare-retrieval",
             ])
             backend = AudioModelBackend(args)
@@ -206,7 +473,7 @@ class BackendTests(unittest.TestCase):
 
     def test_cancelled_native_reply_emits_no_audio_or_history(self):
         with tempfile.TemporaryDirectory() as directory:
-            backend = AudioModelBackend(parse_args(["--backend", "kimi", "--output-dir", directory]))
+            backend = AudioModelBackend(parse_args(["--backend", "omni-local", "--output-dir", directory]))
             backend.load = Mock()
             event, audio = threading.Event(), Mock()
 
@@ -222,74 +489,8 @@ class BackendTests(unittest.TestCase):
             audio.assert_not_called()
             self.assertFalse(list(Path(directory).rglob("turn.json")))
 
-    def kimi(self, prompt_length=5):
-        backend = KimiAudioBackend(parse_args(["--backend", "kimi"]))
-        backend.llm_device = torch.device("cpu")
-        ids = [500, 1012, 1013, 501] + [99] * (prompt_length - 4)
-        prompt = SimpleNamespace(
-            audio_token_ids=ids, continuous_feature=[torch.ones(1, 2, 3)],
-            to_tensor=lambda: (torch.tensor([ids]), torch.zeros(1, len(ids), dtype=torch.long),
-                               torch.zeros(1, len(ids), dtype=torch.bool), None, None),
-        )
-        runtime = SimpleNamespace(
-            alm=SimpleNamespace(forward=Mock(return_value="logits"),
-                                config=SimpleNamespace(max_position_embeddings=8192)),
-            prompt_manager=SimpleNamespace(get_prompt=Mock(return_value=prompt)),
-            kimia_token_offset=1000, kimia_text_audiodelaytokens=6,
-            extra_tokens=SimpleNamespace(media_begin=500, media_end=501),
-            _generate_loop=Mock(return_value=([1014, 1015, 501], [11, 12, 1001])),
-            detokenize_text=Mock(return_value="Kimi 回复"),
-            detokenize_audio=Mock(return_value=torch.ones(1, 20)),
-        )
-        backend.runtime = runtime
-        return backend, runtime
-
-    def test_kimi_uses_dual_stream_input_and_native_decoder(self):
-        backend, runtime = self.kimi()
-        with patch("torch.cuda.device", return_value=nullcontext()):
-            reply = backend.infer([{"role": "user", "text": "资料", "audio": "question.wav"}], True, 64, None)
-        self.assertEqual(reply.input_tokens, [12, 13])
-        self.assertEqual(reply.text, "Kimi 回复")
-        runtime.detokenize_text.assert_called_once_with([11, 12])
-        self.assertEqual(runtime.detokenize_audio.call_args.args[0].tolist(), [[14, 15]])
-        options = runtime._generate_loop.call_args.kwargs
-        self.assertEqual(options["max_new_tokens"], 64)
-        self.assertEqual(options["output_type"], "both")
-        self.assertEqual(options["continous_feature"][0].shape, (1, 2, 3))
-        self.assertEqual([chat["message_type"] for chat in runtime.prompt_manager.get_prompt.call_args.args[0]],
-                         ["text", "audio"])
-
-    def test_kimi_caps_audio_budget_and_text_mode_skips_decoder(self):
-        backend, runtime = self.kimi(prompt_length=8142)
-        with patch("torch.cuda.device", return_value=nullcontext()):
-            backend.infer([{"role": "user", "text": "hello"}], True, 768, None)
-            self.assertEqual(runtime._generate_loop.call_args.kwargs["max_new_tokens"], 50)
-            runtime.detokenize_audio.reset_mock()
-            reply = backend.infer([{"role": "user", "text": "hello"}], False, 8, None)
-        self.assertIsNone(reply.waveform)
-        runtime.detokenize_audio.assert_not_called()
-
-    def test_kimi_cancellation_restores_forward_for_retry(self):
-        backend, runtime = self.kimi()
-        event = threading.Event()
-        forward = runtime.alm.forward
-
-        def generate(**kwargs):
-            event.set()
-            runtime.alm.forward()
-
-        runtime._generate_loop.side_effect = generate
-        with patch("torch.cuda.device", return_value=nullcontext()), self.assertRaises(InferenceCancelled):
-            backend.infer([{"role": "user", "text": "hello"}], True, 64, event)
-        self.assertIs(runtime.alm.forward, forward)
-        runtime.detokenize_audio.assert_not_called()
-        event.clear()
-        runtime._generate_loop.side_effect = None
-        with patch("torch.cuda.device", return_value=nullcontext()):
-            self.assertEqual(backend.infer([{"role": "user", "text": "hello"}], False, 8, event).text, "Kimi 回复")
-
     def test_turn_judgment_uses_native_text_generation_and_removes_probe_file(self):
-        backend = AudioModelBackend(parse_args(["--backend", "kimi"]))
+        backend = AudioModelBackend(parse_args(["--backend", "omni-local"]))
         backend.infer = Mock(return_value=VoiceReply("1: 好", None))
         self.assertEqual(backend.judge_turn(recording()[44:], 16000, "zh", None), ("reply", None))
         self.assertFalse(Path(backend.infer.call_args.args[0][0]["audio"]).exists())
@@ -328,7 +529,7 @@ class BackendTests(unittest.TestCase):
     def test_omni_uses_own_processor_and_decodes_only_new_text(self):
         from transformers import BatchFeature
 
-        backend = QwenOmniBackend(parse_args(["--backend", "omni"]))
+        backend = QwenOmniBackend(parse_args(["--backend", "omni-local"]))
         backend.llm_device = torch.device("cpu")
         config = SimpleNamespace(thinker_config=SimpleNamespace(text_config=SimpleNamespace(max_position_embeddings=100)))
         backend.model = SimpleNamespace(dtype=torch.bfloat16, config=config,

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import logging
 import math
 
-from voice_input import load_call_vad
+from .input import load_call_vad
 
 LOG = logging.getLogger(__name__)
 SAMPLE_RATE = 16000

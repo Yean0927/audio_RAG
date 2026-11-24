@@ -9,8 +9,9 @@ from __future__ import annotations
 import argparse
 import gc
 import os
-from pathlib import Path
 import sys
+
+from voice_service import ROOT
 
 
 def main():
@@ -18,7 +19,6 @@ def main():
     parser.add_argument("--skip-sonar", action="store_true", help="Only download voice-call models (no knowledge retrieval)")
     parser.add_argument("--languages", nargs="+", choices=["zh", "en"], default=["zh", "en"], help="SONAR speech languages; default: zh en")
     args = parser.parse_args()
-    root = Path(__file__).resolve().parent
 
     # Set these before importing Hub/Transformers, which read flags at import.
     for key in ("HF_HUB_OFFLINE", "TRANSFORMERS_OFFLINE", "HF_DATASETS_OFFLINE"):
@@ -43,7 +43,7 @@ def main():
     print("每个文件显示下载进度；获取远程文件列表时可能暂时没有进度条。", flush=True)
     print("请先停止正在自动下载的网页服务，避免同时写入模型目录。", flush=True)
 
-    decoder_dir = root / "glm-4-voice-decoder"
+    decoder_dir = ROOT / "glm-4-voice-decoder"
     stage("语音 Decoder：config.yaml / flow.pt / hift.pt")
     snapshot_download(
         repo_id="zai-org/glm-4-voice-decoder",

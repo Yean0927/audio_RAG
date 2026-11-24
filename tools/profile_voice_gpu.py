@@ -8,8 +8,9 @@ from pathlib import Path
 from statistics import median
 import time
 
-from voice_web_demo import ROOT, VoiceBackend, make_prompt
-from voice_gpu import audio_prompt_slice, audio_token_range, make_gpu_encoder
+from voice_service import ROOT
+from voice_service.glm import VoiceBackend, make_prompt
+from voice_service.gpu import audio_prompt_slice, audio_token_range, make_gpu_encoder
 
 
 def trace_device_activity(path, measure, first):
